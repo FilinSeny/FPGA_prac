@@ -5,6 +5,7 @@ module top #(
     input  wire       CLK,
     input  wire       RESET,     // Board reset button: active low.
     input  wire [3:0] KEY_SW,    // Board buttons: active low.
+
     output wire [3:0] LED,
     output wire [7:0] SEG,
     output wire [3:0] DIG
@@ -33,16 +34,19 @@ module top #(
 
     wire [7:0] abcdefgh;
     wire [3:0] digit;
+
     commutator #(
         .CLK_MHZ(CLK_MHZ), .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES)
     ) u_commutator (
-        .clk(CLK), .rst(rst), .keys({1'b0, ~KEY_SW[0]}),
-        .switch_reg(address_bits), .abcdefgh(abcdefgh), .digit(digit)
+        .clk(CLK),
+        .rst(rst),
+        .keys({1'b0, ~KEY_SW[0]}),
+        .switch_reg(address_bits),
+        .abcdefgh(SEG),
+        .digit(DIG)
     );
 
-    // OMDAZZ board wrapper polarity, matching basics-graphics-music.
     assign SEG = ~abcdefgh;
     assign DIG = ~digit;
-    // LEDs are active low: three address bits and reset indication.
     assign LED = ~{rst, address_bits};
 endmodule

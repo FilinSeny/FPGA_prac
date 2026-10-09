@@ -46,7 +46,7 @@ module top #(
     ) u_commutator (
         .clk(CLK),
         .rst(rst),
-        .keys({1'b0, ~KEY[0]}),
+        .keys({~KEY[1], ~KEY[0]}),
         .switch_reg(address_bits),
         .abcdefgh(SEG),
         .digit(DIG),

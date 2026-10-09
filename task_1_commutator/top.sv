@@ -4,7 +4,8 @@ module top #(
 ) (
     input  wire       CLK,
     input  wire       RESET,     // Board reset button: active low.
-    input  wire [3:0] KEY_SW,    // Board buttons: active low.
+    input  wire [1:0] KEY,    // Board buttons: active low.
+    input  wire [1:0] SW,
 
     output wire       DATA_OUT,
     output wire       DATA_IN,
@@ -17,7 +18,6 @@ module top #(
     assign data_in = DATA_IN;
     assign data_out = DATA_OUT;
 
-    // Power-up reset, asynchronous assertion, synchronous release.
     (* async_reg = "true" *) logic [1:0] reset_pipe = 2'b11;
     always_ff @(posedge CLK or negedge RESET) begin
         if (!RESET)
@@ -27,15 +27,14 @@ module top #(
     end
     wire rst = reset_pipe[1];
 
-    // Three switches act as address bits; hold them stable while confirming.
     (* async_reg = "true" *) logic [2:0] address_meta, address_bits;
     always_ff @(posedge CLK) begin
         if (rst) begin
             address_meta <= '0;
             address_bits <= '0;
         end else begin
-            address_meta <= ~KEY_SW[3:1];
-            address_bits <= address_meta;
+            address_meta[1:0] <= ~SW[1:0];
+            address_bits[1:0] <= address_meta[1:0];
         end
     end
 
@@ -47,7 +46,7 @@ module top #(
     ) u_commutator (
         .clk(CLK),
         .rst(rst),
-        .keys({1'b0, ~KEY_SW[0]}),
+        .keys({1'b0, ~KEY[0]}),
         .switch_reg(address_bits),
         .abcdefgh(SEG),
         .digit(DIG),

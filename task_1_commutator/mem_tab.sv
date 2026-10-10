@@ -13,7 +13,7 @@ module mem_tab
     output wire[1:0] next_hop_out,
     output enable
 );
-
+/*
 initial begin
     //чтение памяти из конфиг файла\
     //мб это нужно в самом раме, пока хз
@@ -28,7 +28,7 @@ end
     1е - адрес назначения
     2е - некстхоп
 
-*/
+
 
 wire addr;
 ram my_ram(
@@ -40,8 +40,8 @@ ram my_ram(
 
 always @* begin
     if (we)
-end
+end;
 
-
+*/
 
 endmodule

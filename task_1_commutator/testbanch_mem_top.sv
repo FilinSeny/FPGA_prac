@@ -6,6 +6,7 @@ module tb_top;
     wire [3:0] LED, DIG;
     wire [7:0] SEG;
     int writes = 0;
+    wire DATA_OUT, DATA_IN;
     
     top #(.DEBOUNCE_CYCLES(4)) dut (.*);
 

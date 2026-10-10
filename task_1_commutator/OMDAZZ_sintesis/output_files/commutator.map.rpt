@@ -1,0 +1,495 @@
+Analysis & Synthesis report for commutator
+Sat Oct 10 19:16:42 2026
+Quartus Prime Version 21.1.1 Build 850 06/23/2022 SJ Lite Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Analysis & Synthesis Summary
+  3. Analysis & Synthesis Settings
+  4. Parallel Compilation
+  5. Analysis & Synthesis Source Files Read
+  6. Analysis & Synthesis Resource Usage Summary
+  7. Analysis & Synthesis Resource Utilization by Entity
+  8. Registers Removed During Synthesis
+  9. Removed Registers Triggering Further Register Optimizations
+ 10. General Register Statistics
+ 11. Inverted Register Statistics
+ 12. Multiplexer Restructuring Statistics (Restructuring Performed)
+ 13. Parameter Settings for User Entity Instance: Top-level Entity: |top
+ 14. Parameter Settings for User Entity Instance: commutator:u_commutator
+ 15. Parameter Settings for User Entity Instance: commutator:u_commutator|ram:addr_tab
+ 16. Parameter Settings for User Entity Instance: commutator:u_commutator|seven_seg_disp:display
+ 17. Port Connectivity Checks: "commutator:u_commutator|seven_seg_disp:display"
+ 18. Port Connectivity Checks: "commutator:u_commutator|ram:addr_tab"
+ 19. Port Connectivity Checks: "commutator:u_commutator"
+ 20. Post-Synthesis Netlist Statistics for Top Partition
+ 21. Elapsed Time Per Partition
+ 22. Analysis & Synthesis Messages
+ 23. Analysis & Synthesis Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 2022  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and any partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details, at
+https://fpgasoftware.intel.com/eula.
+
+
+
++----------------------------------------------------------------------------------+
+; Analysis & Synthesis Summary                                                     ;
++------------------------------------+---------------------------------------------+
+; Analysis & Synthesis Status        ; Successful - Sat Oct 10 19:16:42 2026       ;
+; Quartus Prime Version              ; 21.1.1 Build 850 06/23/2022 SJ Lite Edition ;
+; Revision Name                      ; commutator                                  ;
+; Top-level Entity Name              ; top                                         ;
+; Family                             ; Cyclone IV E                                ;
+; Total logic elements               ; 107                                         ;
+;     Total combinational functions  ; 103                                         ;
+;     Dedicated logic registers      ; 63                                          ;
+; Total registers                    ; 63                                          ;
+; Total pins                         ; 24                                          ;
+; Total virtual pins                 ; 0                                           ;
+; Total memory bits                  ; 0                                           ;
+; Embedded Multiplier 9-bit elements ; 0                                           ;
+; Total PLLs                         ; 0                                           ;
++------------------------------------+---------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Settings                                                                              ;
++------------------------------------------------------------------+--------------------+--------------------+
+; Option                                                           ; Setting            ; Default Value      ;
++------------------------------------------------------------------+--------------------+--------------------+
+; Device                                                           ; EP4CE6E22C8        ;                    ;
+; Top-level entity name                                            ; top                ; commutator         ;
+; Family name                                                      ; Cyclone IV E       ; Cyclone V          ;
+; Use smart compilation                                            ; Off                ; Off                ;
+; Enable parallel Assembler and Timing Analyzer during compilation ; On                 ; On                 ;
+; Enable compact report table                                      ; Off                ; Off                ;
+; Restructure Multiplexers                                         ; Auto               ; Auto               ;
+; Create Debugging Nodes for IP Cores                              ; Off                ; Off                ;
+; Preserve fewer node names                                        ; On                 ; On                 ;
+; Intel FPGA IP Evaluation Mode                                    ; Enable             ; Enable             ;
+; Verilog Version                                                  ; Verilog_2001       ; Verilog_2001       ;
+; VHDL Version                                                     ; VHDL_1993          ; VHDL_1993          ;
+; State Machine Processing                                         ; Auto               ; Auto               ;
+; Safe State Machine                                               ; Off                ; Off                ;
+; Extract Verilog State Machines                                   ; On                 ; On                 ;
+; Extract VHDL State Machines                                      ; On                 ; On                 ;
+; Ignore Verilog initial constructs                                ; Off                ; Off                ;
+; Iteration limit for constant Verilog loops                       ; 5000               ; 5000               ;
+; Iteration limit for non-constant Verilog loops                   ; 250                ; 250                ;
+; Add Pass-Through Logic to Inferred RAMs                          ; On                 ; On                 ;
+; Infer RAMs from Raw Logic                                        ; On                 ; On                 ;
+; Parallel Synthesis                                               ; On                 ; On                 ;
+; DSP Block Balancing                                              ; Auto               ; Auto               ;
+; NOT Gate Push-Back                                               ; On                 ; On                 ;
+; Power-Up Don't Care                                              ; On                 ; On                 ;
+; Remove Redundant Logic Cells                                     ; Off                ; Off                ;
+; Remove Duplicate Registers                                       ; On                 ; On                 ;
+; Ignore CARRY Buffers                                             ; Off                ; Off                ;
+; Ignore CASCADE Buffers                                           ; Off                ; Off                ;
+; Ignore GLOBAL Buffers                                            ; Off                ; Off                ;
+; Ignore ROW GLOBAL Buffers                                        ; Off                ; Off                ;
+; Ignore LCELL Buffers                                             ; Off                ; Off                ;
+; Ignore SOFT Buffers                                              ; On                 ; On                 ;
+; Limit AHDL Integers to 32 Bits                                   ; Off                ; Off                ;
+; Optimization Technique                                           ; Balanced           ; Balanced           ;
+; Carry Chain Length                                               ; 70                 ; 70                 ;
+; Auto Carry Chains                                                ; On                 ; On                 ;
+; Auto Open-Drain Pins                                             ; On                 ; On                 ;
+; Perform WYSIWYG Primitive Resynthesis                            ; Off                ; Off                ;
+; Auto ROM Replacement                                             ; On                 ; On                 ;
+; Auto RAM Replacement                                             ; On                 ; On                 ;
+; Auto DSP Block Replacement                                       ; On                 ; On                 ;
+; Auto Shift Register Replacement                                  ; Auto               ; Auto               ;
+; Allow Shift Register Merging across Hierarchies                  ; Auto               ; Auto               ;
+; Auto Clock Enable Replacement                                    ; On                 ; On                 ;
+; Strict RAM Replacement                                           ; Off                ; Off                ;
+; Allow Synchronous Control Signals                                ; On                 ; On                 ;
+; Force Use of Synchronous Clear Signals                           ; Off                ; Off                ;
+; Auto RAM Block Balancing                                         ; On                 ; On                 ;
+; Auto RAM to Logic Cell Conversion                                ; Off                ; Off                ;
+; Auto Resource Sharing                                            ; Off                ; Off                ;
+; Allow Any RAM Size For Recognition                               ; Off                ; Off                ;
+; Allow Any ROM Size For Recognition                               ; Off                ; Off                ;
+; Allow Any Shift Register Size For Recognition                    ; Off                ; Off                ;
+; Use LogicLock Constraints during Resource Balancing              ; On                 ; On                 ;
+; Ignore translate_off and synthesis_off directives                ; Off                ; Off                ;
+; Timing-Driven Synthesis                                          ; On                 ; On                 ;
+; Report Parameter Settings                                        ; On                 ; On                 ;
+; Report Source Assignments                                        ; On                 ; On                 ;
+; Report Connectivity Checks                                       ; On                 ; On                 ;
+; Ignore Maximum Fan-Out Assignments                               ; Off                ; Off                ;
+; Synchronization Register Chain Length                            ; 2                  ; 2                  ;
+; Power Optimization During Synthesis                              ; Normal compilation ; Normal compilation ;
+; HDL message level                                                ; Level2             ; Level2             ;
+; Suppress Register Optimization Related Messages                  ; Off                ; Off                ;
+; Number of Removed Registers Reported in Synthesis Report         ; 5000               ; 5000               ;
+; Number of Swept Nodes Reported in Synthesis Report               ; 5000               ; 5000               ;
+; Number of Inverted Registers Reported in Synthesis Report        ; 100                ; 100                ;
+; Clock MUX Protection                                             ; On                 ; On                 ;
+; Auto Gated Clock Conversion                                      ; Off                ; Off                ;
+; Block Design Naming                                              ; Auto               ; Auto               ;
+; SDC constraint protection                                        ; Off                ; Off                ;
+; Synthesis Effort                                                 ; Auto               ; Auto               ;
+; Shift Register Replacement - Allow Asynchronous Clear Signal     ; On                 ; On                 ;
+; Pre-Mapping Resynthesis Optimization                             ; Off                ; Off                ;
+; Analysis & Synthesis Message Level                               ; Medium             ; Medium             ;
+; Disable Register Merging Across Hierarchies                      ; Auto               ; Auto               ;
+; Resource Aware Inference For Block RAM                           ; On                 ; On                 ;
++------------------------------------------------------------------+--------------------+--------------------+
+
+
++------------------------------------------+
+; Parallel Compilation                     ;
++----------------------------+-------------+
+; Processors                 ; Number      ;
++----------------------------+-------------+
+; Number detected on machine ; 12          ;
+; Maximum allowed            ; 12          ;
+;                            ;             ;
+; Average used               ; 1.00        ;
+; Maximum used               ; 12          ;
+;                            ;             ;
+; Usage by Processor         ; % Time Used ;
+;     Processor 1            ; 100.0%      ;
+;     Processor 2            ;   0.0%      ;
+;     Processors 3-12        ;   0.0%      ;
++----------------------------+-------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                                                         ;
++-----------------------------------------------------------------+-----------------+------------------------------+-------------------------------------------------------------------+---------+
+; File Name with User-Entered Path                                ; Used in Netlist ; File Type                    ; File Name with Absolute Path                                      ; Library ;
++-----------------------------------------------------------------+-----------------+------------------------------+-------------------------------------------------------------------+---------+
+; ../top.sv                                                       ; yes             ; User SystemVerilog HDL File  ; /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv            ;         ;
+; ../seven_seg_disp.sv                                            ; yes             ; User SystemVerilog HDL File  ; /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv ;         ;
+; ../ram.sv                                                       ; yes             ; User SystemVerilog HDL File  ; /home/filin-seny/mk/FPGA_prac/task_1_commutator/ram.sv            ;         ;
+; ../commutator.sv                                                ; yes             ; User SystemVerilog HDL File  ; /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv     ;         ;
+; /home/filin-seny/mk/FPGA_prac/task_1_commutator/data/config.mem ; yes             ; Auto-Found Unspecified File  ; /home/filin-seny/mk/FPGA_prac/task_1_commutator/data/config.mem   ;         ;
++-----------------------------------------------------------------+-----------------+------------------------------+-------------------------------------------------------------------+---------+
+
+
++---------------------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary             ;
++---------------------------------------------+-----------+
+; Resource                                    ; Usage     ;
++---------------------------------------------+-----------+
+; Estimated Total logic elements              ; 107       ;
+;                                             ;           ;
+; Total combinational functions               ; 103       ;
+; Logic element usage by number of LUT inputs ;           ;
+;     -- 4 input functions                    ; 28        ;
+;     -- 3 input functions                    ; 6         ;
+;     -- <=2 input functions                  ; 69        ;
+;                                             ;           ;
+; Logic elements by mode                      ;           ;
+;     -- normal mode                          ; 66        ;
+;     -- arithmetic mode                      ; 37        ;
+;                                             ;           ;
+; Total registers                             ; 63        ;
+;     -- Dedicated logic registers            ; 63        ;
+;     -- I/O registers                        ; 0         ;
+;                                             ;           ;
+; I/O pins                                    ; 24        ;
+;                                             ;           ;
+; Embedded Multiplier 9-bit elements          ; 0         ;
+;                                             ;           ;
+; Maximum fan-out node                        ; CLK~input ;
+; Maximum fan-out                             ; 63        ;
+; Total fan-out                               ; 489       ;
+; Average fan-out                             ; 2.29      ;
++---------------------------------------------+-----------+
+
+
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                                                                                                                                                             ;
++--------------------------------+---------------------+---------------------------+-------------+--------------+---------+-----------+------+--------------+-----------------------------------------------------+----------------+--------------+
+; Compilation Hierarchy Node     ; Combinational ALUTs ; Dedicated Logic Registers ; Memory Bits ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; Full Hierarchy Name                                 ; Entity Name    ; Library Name ;
++--------------------------------+---------------------+---------------------------+-------------+--------------+---------+-----------+------+--------------+-----------------------------------------------------+----------------+--------------+
+; |top                           ; 103 (6)             ; 63 (8)                    ; 0           ; 0            ; 0       ; 0         ; 24   ; 0            ; |top                                                ; top            ; work         ;
+;    |commutator:u_commutator|   ; 97 (41)             ; 55 (29)                   ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |top|commutator:u_commutator                        ; commutator     ; work         ;
+;       |seven_seg_disp:display| ; 56 (56)             ; 26 (26)                   ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |top|commutator:u_commutator|seven_seg_disp:display ; seven_seg_disp ; work         ;
++--------------------------------+---------------------+---------------------------+-------------+--------------+---------+-----------+------+--------------+-----------------------------------------------------+----------------+--------------+
+Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------+
+; Registers Removed During Synthesis                                                                                                             ;
++----------------------------------------------------------------------+-------------------------------------------------------------------------+
+; Register name                                                        ; Reason for Removal                                                      ;
++----------------------------------------------------------------------+-------------------------------------------------------------------------+
+; commutator:u_commutator|seven_seg_disp:display|r_number[3..7,12..15] ; Stuck at GND due to stuck port data_in                                  ;
+; commutator:u_commutator|seven_seg_disp:display|r_number[11]          ; Merged with commutator:u_commutator|seven_seg_disp:display|r_number[10] ;
+; commutator:u_commutator|state[3,4]                                   ; Merged with commutator:u_commutator|state[2]                            ;
+; commutator:u_commutator|state[2]                                     ; Stuck at GND due to stuck port data_in                                  ;
+; commutator:u_commutator|seven_seg_disp:display|r_number[10]          ; Stuck at GND due to stuck port data_in                                  ;
+; Total Number of Removed Registers = 14                               ;                                                                         ;
++----------------------------------------------------------------------+-------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------+
+; Removed Registers Triggering Further Register Optimizations                                                                ;
++----------------------------------+---------------------------+-------------------------------------------------------------+
+; Register name                    ; Reason for Removal        ; Registers Removed due to This Register                      ;
++----------------------------------+---------------------------+-------------------------------------------------------------+
+; commutator:u_commutator|state[2] ; Stuck at GND              ; commutator:u_commutator|seven_seg_disp:display|r_number[10] ;
+;                                  ; due to stuck port data_in ;                                                             ;
++----------------------------------+---------------------------+-------------------------------------------------------------+
+
+
++------------------------------------------------------+
+; General Register Statistics                          ;
++----------------------------------------------+-------+
+; Statistic                                    ; Value ;
++----------------------------------------------+-------+
+; Total registers                              ; 63    ;
+; Number of registers using Synchronous Clear  ; 23    ;
+; Number of registers using Synchronous Load   ; 0     ;
+; Number of registers using Asynchronous Clear ; 28    ;
+; Number of registers using Asynchronous Load  ; 0     ;
+; Number of registers using Clock Enable       ; 8     ;
+; Number of registers using Preset             ; 0     ;
++----------------------------------------------+-------+
+
+
++--------------------------------------------------+
+; Inverted Register Statistics                     ;
++----------------------------------------+---------+
+; Inverted Register                      ; Fan out ;
++----------------------------------------+---------+
+; reset_pipe[1]                          ; 44      ;
+; reset_pipe[0]                          ; 1       ;
+; Total number of inverted registers = 2 ;         ;
++----------------------------------------+---------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Multiplexer Restructuring Statistics (Restructuring Performed)                                                                                                         ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------------------------------------+
+; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output                               ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------------------------------------+
+; 3:1                ; 3 bits    ; 6 LEs         ; 3 LEs                ; 3 LEs                  ; Yes        ; |top|commutator:u_commutator|dst_reg[1]                  ;
+; 4:1                ; 20 bits   ; 40 LEs        ; 20 LEs               ; 20 LEs                 ; Yes        ; |top|commutator:u_commutator|key_count[15]               ;
+; 4:1                ; 2 bits    ; 4 LEs         ; 4 LEs                ; 0 LEs                  ; No         ; |top|commutator:u_commutator|seven_seg_disp:display|Mux0 ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------------------------------------+
+
+
++---------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: Top-level Entity: |top ;
++-----------------+---------+-----------------------------------------+
+; Parameter Name  ; Value   ; Type                                    ;
++-----------------+---------+-----------------------------------------+
+; CLK_MHZ         ; 50      ; Signed Integer                          ;
+; DEBOUNCE_CYCLES ; 1000000 ; Signed Integer                          ;
++-----------------+---------+-----------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: commutator:u_commutator ;
++-----------------+---------+------------------------------------------+
+; Parameter Name  ; Value   ; Type                                     ;
++-----------------+---------+------------------------------------------+
+; CLK_MHZ         ; 50      ; Signed Integer                           ;
+; DEBOUNCE_CYCLES ; 1000000 ; Signed Integer                           ;
++-----------------+---------+------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-----------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: commutator:u_commutator|ram:addr_tab ;
++----------------+-------+----------------------------------------------------------+
+; Parameter Name ; Value ; Type                                                     ;
++----------------+-------+----------------------------------------------------------+
+; ADDR_WIDTH     ; 3     ; Signed Integer                                           ;
++----------------+-------+----------------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: commutator:u_commutator|seven_seg_disp:display ;
++----------------+-------+--------------------------------------------------------------------+
+; Parameter Name ; Value ; Type                                                               ;
++----------------+-------+--------------------------------------------------------------------+
+; w_digit        ; 4     ; Signed Integer                                                     ;
+; clk_mhz        ; 50    ; Signed Integer                                                     ;
+; update_hz      ; 120   ; Signed Integer                                                     ;
++----------------+-------+--------------------------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------+
+; Port Connectivity Checks: "commutator:u_commutator|seven_seg_disp:display" ;
++----------------+-------+----------+----------------------------------------+
+; Port           ; Type  ; Severity ; Details                                ;
++----------------+-------+----------+----------------------------------------+
+; number[15..12] ; Input ; Info     ; Stuck at GND                           ;
+; number[7..3]   ; Input ; Info     ; Stuck at GND                           ;
+; dots           ; Input ; Info     ; Stuck at GND                           ;
++----------------+-------+----------+----------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "commutator:u_commutator|ram:addr_tab"                                                   ;
++----------+--------+----------+-------------------------------------------------------------------------------------+
+; Port     ; Type   ; Severity ; Details                                                                             ;
++----------+--------+----------+-------------------------------------------------------------------------------------+
+; data_out ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; loopback ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; valid    ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++----------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "commutator:u_commutator"                                                                ;
++----------+--------+----------+-------------------------------------------------------------------------------------+
+; Port     ; Type   ; Severity ; Details                                                                             ;
++----------+--------+----------+-------------------------------------------------------------------------------------+
+; keys[1]  ; Input  ; Info     ; Stuck at GND                                                                        ;
+; data_in  ; Input  ; Info     ; Stuck at GND                                                                        ;
+; data_out ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++----------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++-----------------------------------------------------+
+; Post-Synthesis Netlist Statistics for Top Partition ;
++-----------------------+-----------------------------+
+; Type                  ; Count                       ;
++-----------------------+-----------------------------+
+; boundary_port         ; 24                          ;
+; cycloneiii_ff         ; 63                          ;
+;     CLR               ; 23                          ;
+;     ENA               ; 3                           ;
+;     ENA CLR           ; 5                           ;
+;     SCLR              ; 23                          ;
+;     plain             ; 9                           ;
+; cycloneiii_lcell_comb ; 113                         ;
+;     arith             ; 37                          ;
+;         2 data inputs ; 37                          ;
+;     normal            ; 76                          ;
+;         0 data inputs ; 2                           ;
+;         1 data inputs ; 10                          ;
+;         2 data inputs ; 30                          ;
+;         3 data inputs ; 6                           ;
+;         4 data inputs ; 28                          ;
+;                       ;                             ;
+; Max LUT depth         ; 4.00                        ;
+; Average LUT depth     ; 2.60                        ;
++-----------------------+-----------------------------+
+
+
++-------------------------------+
+; Elapsed Time Per Partition    ;
++----------------+--------------+
+; Partition Name ; Elapsed Time ;
++----------------+--------------+
+; Top            ; 00:00:00     ;
++----------------+--------------+
+
+
++-------------------------------+
+; Analysis & Synthesis Messages ;
++-------------------------------+
+Info: *******************************************************************
+Info: Running Quartus Prime Analysis & Synthesis
+    Info: Version 21.1.1 Build 850 06/23/2022 SJ Lite Edition
+    Info: Processing started: Sat Oct 10 19:16:37 2026
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off commutator -c commutator
+Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
+Info (20030): Parallel compilation is enabled and will use 12 of the 12 processors detected
+Warning (10335): Unrecognized synthesis attribute "async_reg" at ../top.sv(21) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 21
+Warning (10335): Unrecognized synthesis attribute "async_reg" at ../top.sv(31) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 31
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv
+    Info (12023): Found entity 1: top File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/testbanch_mem_top.sv
+    Info (12023): Found entity 1: tb_top File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/testbanch_mem_top.sv Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/testbanch_mem.sv
+    Info (12023): Found entity 1: testbanch_mem File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/testbanch_mem.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv
+    Info (12023): Found entity 1: seven_seg_disp File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 5
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/ram.sv
+    Info (12023): Found entity 1: ram File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/ram.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/old_commutator.sv
+    Info (12023): Found entity 1: old_commutator File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/old_commutator.sv Line: 1
+Warning (10090): Verilog HDL syntax warning at mem_tab.sv(22): extra block comment delimiter characters /* within block comment File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/mem_tab.sv Line: 22
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/mem_tab.sv
+    Info (12023): Found entity 1: mem_tab File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/mem_tab.sv Line: 1
+Warning (10335): Unrecognized synthesis attribute "async_reg" at ../commutator_DEv0.sv(34) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator_DEv0.sv Line: 34
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator_DEv0.sv
+    Info (12023): Found entity 1: commutator_DEv0 File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator_DEv0.sv Line: 1
+Warning (10335): Unrecognized synthesis attribute "async_reg" at ../commutator.sv(38) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv Line: 38
+Info (12021): Found 1 design units, including 1 entities, in source file /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv
+    Info (12023): Found entity 1: commutator File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv Line: 1
+Info (12127): Elaborating entity "top" for the top level hierarchy
+Warning (10030): Net "DATA_OUT" at top.sv(9) has no driver or initial value, using a default initial value '0' File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 9
+Warning (10030): Net "DATA_IN" at top.sv(10) has no driver or initial value, using a default initial value '0' File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 10
+Info (12128): Elaborating entity "commutator" for hierarchy "commutator:u_commutator" File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 56
+Info (10264): Verilog HDL Case Statement information at commutator.sv(106): all case item expressions in this case statement are onehot File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv Line: 106
+Warning (10034): Output port "data_out" at commutator.sv(11) has no driver File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv Line: 11
+Info (12128): Elaborating entity "ram" for hierarchy "commutator:u_commutator|ram:addr_tab" File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv Line: 74
+Warning (10230): Verilog HDL assignment warning at config.mem(1): truncated value with size 4 to match size of target (3) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/data/config.mem Line: 1
+Warning (10855): Verilog HDL warning at ram.sv(23): initial value for variable ram should be constant File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/ram.sv Line: 23
+Info (12128): Elaborating entity "seven_seg_disp" for hierarchy "commutator:u_commutator|seven_seg_disp:display" File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/commutator.sv Line: 123
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(27): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 27
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(28): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 28
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(29): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 29
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(30): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 30
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(31): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 31
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(32): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 32
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(33): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 33
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(34): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 34
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(35): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 35
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(36): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 36
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(37): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 37
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(38): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 38
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(39): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 39
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(40): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 40
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(41): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 41
+Warning (10230): Verilog HDL assignment warning at seven_seg_disp.sv(42): truncated value with size 32 to match size of target (8) File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/seven_seg_disp.sv Line: 42
+Info (13000): Registers with preset signals will power-up high File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 26
+Info (13003): DEV_CLRn pin will set, and not reset, register with preset signal due to NOT Gate Push-Back
+Warning (13024): Output pins are stuck at VCC or GND
+    Warning (13410): Pin "DATA_OUT" is stuck at GND File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 9
+    Warning (13410): Pin "DATA_IN" is stuck at GND File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 10
+    Warning (13410): Pin "SEG[0]" is stuck at VCC File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 12
+Info (286030): Timing-Driven Synthesis is running
+Info (144001): Generated suppressed messages file /home/filin-seny/mk/FPGA_prac/task_1_commutator/OMDAZZ_sintesis/output_files/commutator.map.smsg
+Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
+    Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
+Info (21057): Implemented 131 device resources after synthesis - the final resource count might be different
+    Info (21058): Implemented 6 input pins
+    Info (21059): Implemented 18 output pins
+    Info (21061): Implemented 107 logic cells
+Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 31 warnings
+    Info: Peak virtual memory: 475 megabytes
+    Info: Processing ended: Sat Oct 10 19:16:42 2026
+    Info: Elapsed time: 00:00:05
+    Info: Total CPU time (on all processors): 00:00:11
+
+
++------------------------------------------+
+; Analysis & Synthesis Suppressed Messages ;
++------------------------------------------+
+The suppressed messages can be found in /home/filin-seny/mk/FPGA_prac/task_1_commutator/OMDAZZ_sintesis/output_files/commutator.map.smsg.
+
+

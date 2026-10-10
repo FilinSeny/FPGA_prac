@@ -4,10 +4,13 @@ module commutator #(
 ) (
     input  logic       clk,
     input  logic       rst,
-    input  logic [1:0] keys,       // Active high; keys[0] confirms the current step.
+    input  logic [1:0] keys,
     input  logic [2:0] switch_reg,
-    output wire  [7:0] abcdefgh,   // Active-low segments, order a b c d e f g dp.
-    output wire  [3:0] digit       // Active-low digit enables; digit[0] is rightmost.
+    input  logic       data_in,
+    
+    output logic       data_out,
+    output logic [7:0] abcdefgh,
+    output wire  [3:0] digit
 );
     typedef enum logic [4:0] {
         IDLE       = 5'd0,

@@ -1,4 +1,4 @@
-module commutator ()
+module old_commutator ();
     //функционал
     /*
         1 установка режима часов - внешние/внутренние
@@ -9,8 +9,8 @@ module commutator ()
             пакет - семисегментник (если что воткнем омдаз с ним)
         5 состояние прослушки портов
     */
-
-    enum logic[4:0] 
+    /*
+    enum logic[4:0]
     {
         IDLE        = 5'd0,
         CONFIG_DST  = 5'd1,
@@ -107,5 +107,5 @@ module commutator ()
             end
 
         endcase
-    end
+    end*/
 endmodule

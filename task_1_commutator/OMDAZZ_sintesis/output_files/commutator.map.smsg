@@ -1,0 +1,2 @@
+Info (10281): Verilog HDL Declaration information at top.sv(10): object "DATA_IN" differs only in case from object "data_in" in the same scope File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 10
+Info (10281): Verilog HDL Declaration information at top.sv(9): object "DATA_OUT" differs only in case from object "data_out" in the same scope File: /home/filin-seny/mk/FPGA_prac/task_1_commutator/top.sv Line: 9

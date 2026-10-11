@@ -14,14 +14,18 @@ module commutator #(
 );
     typedef enum logic [4:0] {
         IDLE       = 5'd0,
-        CONFIG_DST = 5'd1,
-        CONFIG_HOP = 5'd2,
-        UPD_RAM    = 5'd3,
-        LISTEN     = 5'd4,
-        GET_PACK   = 5'd5,
-        LOAD_HOP   = 5'd6,
-        SEND_PACK  = 5'd7,
-        SHOW_RAM   = 5'd9
+        DATA_RW    = 5'd1,
+        CONFIG_DST = 5'd2,
+        CONFIG_HOP = 5'd3,
+        UPD_RAM    = 5'd4,
+        LISTEN     = 5'd5,
+        GET_PACK   = 5'd6,
+        LOAD_HOP   = 5'd7,
+        SEND_PACK  = 5'd8,
+        SHOW_RAM   = 5'd9,
+        ENTER_MSG  = 5'd10,
+        RESEND_MSG = 5'd11,
+        TXRX_MODE  = 5'd12
     } state_t;
 
     state_t     state, new_state;
@@ -30,42 +34,18 @@ module commutator #(
     wire valid_mem;
     wire we_mem = (state == UPD_RAM) && !rst;
 
-    localparam int KEY_COUNT_WIDTH = (DEBOUNCE_CYCLES > 1)
-                                  ? $clog2(DEBOUNCE_CYCLES) : 1;
-    localparam logic [KEY_COUNT_WIDTH-1:0] KEY_COUNT_MAX =
-        KEY_COUNT_WIDTH'(DEBOUNCE_CYCLES - 1);
-    (* async_reg = "true" *) logic[1:0] key_meta, key_sync;
-    logic   [1:0]   key_stable, key_previous;
-    logic   [KEY_COUNT_WIDTH-1:0] key_count[2];
-    wire    [1:0]   key_press = key_stable & ~key_previous;
+    logic [1:0] key_press;
 
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            key_meta     <= 1'b0;
-            key_sync     <= 1'b0;
-            key_stable   <= 1'b0;
-            key_previous <= 1'b0;
-            
-            for (int i = 0; i < 2; i++) begin
-                key_count[i] <= '0;
-            end
-        end else begin
-            key_meta     <= keys;
-            key_sync     <= key_meta;
-            key_previous <= key_stable;
-           
-            for (int i = 0; i < 2; i++) begin
-                if (key_sync[i] == key_stable[i]) begin
-                    key_count[i] <= '0;
-                end else if (key_count[i] == KEY_COUNT_MAX) begin
-                    key_stable[i] <= key_sync[i];
-                    key_count[i]  <= '0;
-                end else begin
-                    key_count[i] <= key_count[i] + 1'b1;
-                end
-            end
-        end
-    end
+    key_handler #(
+        .KEY_NUM(2),
+        .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES),
+        .ACTIVE_LOW(0)
+    ) buttons (
+        .clk(clk),
+        .rst(rst),
+        .keys(keys),
+        .key_press(key_press)
+    );
 
     ram #(.ADDR_WIDTH(3)) addr_tab (
         .clk(clk),
@@ -111,7 +91,11 @@ module commutator #(
         new_state = state;
         next_ram_addr = ram_addr;
         case (state)
-            IDLE:       begin
+            IDLE: begin
+                if (key_press[0]) new_state = DATA_RW;
+                if (key_press[1]) new_state = TXRX_MODE;
+            end
+            DATA_RW:       begin
                 if (key_press[0]) new_state = CONFIG_DST;
                 if (key_press[1]) new_state = SHOW_RAM;
             end
@@ -127,13 +111,18 @@ module commutator #(
                     end
                 end 
             end
+            TXRX_MODE: begin
+                if (key_press[0]) new_state = LISTEN;
+
+            end
             // Packet processing and entry into LISTEN are still to be implemented.
-            default:    new_state = IDLE;
+
+            ///default:    new_state = IDLE;
         endcase
     end
 
     logic [2:0] display_addr;
-    wire [15:0] display_number;
+    logic [15:0] display_number;
     always_comb begin
         case (state)
             CONFIG_DST, CONFIG_HOP: display_addr = switch_reg;
@@ -141,20 +130,24 @@ module commutator #(
         endcase
     end
 
+    wire [3:0] state_tens, state_ones;
+    assign state_tens = state / 10;
+    assign state_ones = state % 10; 
+
     // Left to right: state tens, state units, 0, address.
     // State codes are currently 0..7, so the tens digit is always zero.
     always_comb begin
         case (state)
              CONFIG_DST, CONFIG_HOP:  begin
-                display_number = {4'd0, state[3:0], 4'd0, 1'b0, display_addr};
+                display_number = {state_tens, state_ones, 4'd0, 1'b0, display_addr};
              end
              SHOW_RAM:
-                display_number =  {4'd0, 
-                                   state[3:0],
+                display_number =  {state_tens, 
+                                   state_ones,
                                    2'b0, ram_addr,
                                    1'b0, next_hop};
             default:   
-                display_number = {4'd0, state[3:0], 8'd0};
+                display_number = {state_tens, state_ones, 5'd0, my_addr};
         endcase
     end
 
@@ -166,4 +159,6 @@ module commutator #(
         .abcdefgh(abcdefgh),
         .digit(digit)
     );
+
+
 endmodule

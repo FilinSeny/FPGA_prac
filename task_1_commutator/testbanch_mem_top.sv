@@ -2,7 +2,8 @@
 module tb_top;
     logic CLK = 1'b0;
     logic RESET = 1'b0;
-    logic [3:0] KEY_SW = 4'b1111;
+    logic [1:0] KEY = 2'b11;
+    logic [1:0] SW  = 2'b11;
     wire [3:0] LED, DIG;
     wire [7:0] SEG;
     int writes = 0;
@@ -28,15 +29,15 @@ module tb_top;
 
     task automatic confirm;
         @(negedge CLK);
-        KEY_SW[0] = 1'b0;
+        KEY[0] = 1'b0;
         cycles(20); // Synchronizer, debounce and FSM latency.
-        KEY_SW[0] = 1'b1;
+        KEY[0] = 1'b1;
         cycles(20);
     endtask
 
-    task automatic set_address(input logic [2:0] value);
+    task automatic set_address(input logic [1:0] value);
         @(negedge CLK);
-        KEY_SW[3:1] = ~value;
+        SW = ~value;
         cycles(5);
     endtask
 
@@ -93,38 +94,38 @@ module tb_top;
         for (int i=1; i<8; i++) check_entry(i, '0);
 
         // A short glitch must not be accepted as a button press.
-        KEY_SW[0] = 1'b0;
+        KEY[0] = 1'b0;
         cycles(1);
-        KEY_SW[0] = 1'b1;
+        KEY[0] = 1'b1;
         cycles(15);
         expect_state(0);
 
         // Holding confirmation must advance only once.
-        KEY_SW[0] = 1'b0;
+        KEY[0] = 1'b0;
         cycles(80);
         expect_state(1);
-        KEY_SW[0] = 1'b1;
+        KEY[0] = 1'b1;
         cycles(20);
-        set_address(3'd1);
+        set_address(2'd1);
         confirm();
         expect_state(2);
 
-        set_address(3'd3);
+        set_address(2'd3);
         confirm();
         expect_state(0);
-        check_entry(1, 3'd3);
+        check_entry(1, 2'd3);
 
         if (writes != 1) $fatal(1, "holding the button caused extra writes");
 
         for (int i=2; i<8; i++) configure_route(3'(i), 3'((i+2)%7+1));
-        configure_route(3'd3, 3'd7); // Overwrite an existing route.
-        configure_route(3'd0, 3'd6); // Reserved entry must be preserved.
+        configure_route(2'd3, 3'd1); // Overwrite an existing route.
+        configure_route(2'd0, 3'd2); // Reserved entry must be preserved.
         check_entry(0, 3'd2);
-        if (dut.u_commutator.my_addr !== 3'd2)
+        if (dut.u_commutator.my_addr !== 2'd2)
             $fatal(1, "loopback changed");
         check_entry(1, 3'd3);
         for (int i=2; i<8; i++)
-            check_entry(i, (i==3) ? 3'd7 : 3'((i+2)%7+1));
+            check_entry(i, (i==3) ? 3'd1 : 3'((i+2)%7+1));
 
 
         RESET = 1'b0;
@@ -132,7 +133,7 @@ module tb_top;
         RESET = 1'b1;
         cycles(10);
         expect_state(0);
-        check_entry(0, 3'd2);
+        check_entry(0, 2'd2);
         for (int i=1; i<8; i++) check_entry(i, '0);
         $display("PASS: button interface, routes 1..7, overwrite, loopback, reset and display");
         $finish;

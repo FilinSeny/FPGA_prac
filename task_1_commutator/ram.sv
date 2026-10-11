@@ -1,45 +1,45 @@
-module ram
+module ram #(
+    parameter int ADDR_WIDTH = 3
+) (
+    input  logic [ADDR_WIDTH-1:0] data_in,
+    input  logic [ADDR_WIDTH-1:0] addr,
+    input  logic                  we,
+    input  logic                  clk,
+    input  logic                  rst,
 
-#(parameter ADDR_WIDTH = 3)
-
-(
-	input  [(ADDR_WIDTH-1):0] data_in,
-	input  [(ADDR_WIDTH-1):0] addr,
-	input  we, clk,
-	input  rst,
-
-	output valid,
-	output [(ADDR_WIDTH-1):0] data_out,
-	output [(ADDR_WIDTH-1):0] loopback
+    output logic                  valid,
+    output logic [ADDR_WIDTH-1:0] data_out,
+    output logic [ADDR_WIDTH-1:0] loopback
 );
-	//Адреса нумеруются с 1 тк как 0 - loopback
-	//При записи выход считаем не валидным
 
+    localparam int RAM_DEPTH = 2**ADDR_WIDTH;
 
-	reg [ADDR_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
-	///reg [ADDR_WIDTH-1:0] addr_reg;
-	///reg [DATA_WIDTH-1:0] data_out;
+    // Own router address
+    logic [ADDR_WIDTH-1:0] config_mem [0:0];
 
-	initial begin
-        $readmemh("../data/config.mem", ram, 0, 0);
+    initial begin
+        $readmemh("../data/config.mem", config_mem);
     end
 
-	always @ (posedge clk) begin
-		if (rst) begin
-			integer i;
-			for (i = 1; i < 2**ADDR_WIDTH; i += 1) begin
-				ram[i] <= 1'b0;
-			end
-		end else
-		begin
-			if (we && addr)
-				ram[addr] <= data_in;
-		end
+    assign loopback = config_mem[0];
 
-	end
+    // Routing table: logical addresses 0..RAM_DEPTH-1
+    logic [ADDR_WIDTH-1:0] ram [0:RAM_DEPTH-1];
 
-	assign valid = !we && !rst;
-	assign data_out = ram[addr];
-	assign loopback = ram[0];
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            for (int i = 0; i < RAM_DEPTH; i++) begin
+                ram[i] <= '0;
+            end
+        end else if (we && (addr != loopback)) begin
+            ram[addr] <= data_in;
+        end
+    end
+
+    assign valid = !we && !rst;
+
+    assign data_out = (addr == loopback)
+                    ? loopback
+                    : ram[addr];
 
 endmodule

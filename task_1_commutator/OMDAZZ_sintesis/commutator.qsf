@@ -5,14 +5,12 @@ set_global_assignment -name ORIGINAL_QUARTUS_VERSION 21.1.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:01:43  OCTOBER 10, 2026"
 set_global_assignment -name LAST_QUARTUS_VERSION "21.1.1 Lite Edition"
 set_global_assignment -name SYSTEMVERILOG_FILE ../top.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../testbanch_mem_top.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../testbanch_mem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../seven_seg_disp.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../ram.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../old_commutator.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../mem_tab.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../commutator_DEv0.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../commutator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../key_handler.sv
+set_global_assignment -name MISC_FILE ../data/config.mem
+
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85

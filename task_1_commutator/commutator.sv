@@ -147,7 +147,7 @@ module commutator #(
                                    2'b0, ram_addr,
                                    1'b0, next_hop};
             default:   
-                display_number = {state_tens, state_ones, 5'd0, my_addr};
+                display_number = {state_tens, state_ones, 8'd0};
         endcase
     end
 

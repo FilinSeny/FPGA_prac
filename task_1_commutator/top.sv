@@ -3,8 +3,8 @@ module top #(
     parameter int DEBOUNCE_CYCLES = CLK_MHZ * 20_000
 ) (
     input  wire       CLK,
-    input  wire       RESET,     // Board reset button: active low.
-    input  wire [1:0] KEY,    // Board buttons: active low.
+    input  wire       RESET,     
+    input  wire [1:0] KEY,  
     input  wire [1:0] SW,
 
     output wire       DATA_OUT,

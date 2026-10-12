@@ -4,22 +4,121 @@ module txrx #(
     parameter int DEBOUNCE_CYCLES = CLK_MHZ * 20_000,
     parameter int FIFO_DEPTH = 24
 )(
-    input  logic clk,
-    input  logic rst,
-    input  logic enable,
+    input  logic       clk,
+    input  logic       rst,
+
+    input  logic       enable,
     input  logic [1:0] keys,
     input  logic [1:0] sw,
-    input  logic [2:0] data_in,             
+    input  logic [2:0] data_in,
     input  logic [1:0] my_addr,
-    input  logic [1:0] next_hop,         
-    output logic [1:0] dst_addr,           
-    output wire  [2:0] data_out,          
+    input  logic [1:0] next_hop,
+
+    output logic [1:0] dst_addr,
+    output wire  [2:0] data_out,
     output wire        stoped,
     output wire [15:0] disp_data,
     output wire        stored_valid
 );
+    typedef enum logic [1:0] {
+        IDLE     = 2'd0,
+        LISTEN   = 2'd1,
+        MK_MSG   = 2'd2,
+        STOPPING = 2'd3
+    } state_t;
+    state_t state, new_state;
 
-    logic [MSG_SIZE-1:0] rx_packet [0:2];
+    logic [1:0] mode_key_press;
+    key_handler #(
+        .KEY_NUM(2),
+        .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES),
+        .ACTIVE_LOW(0)
+    ) mode_buttons (
+        .clk(clk),
+        .rst(rst),
+        .keys(keys),
+        .key_press(mode_key_press)
+    );
+
+    logic start_armed;
+    always_ff @(posedge clk) begin
+        if (rst)
+            start_armed <= 1'b1;
+        else if (!enable)
+            start_armed <= 1'b1;
+        else if (state == IDLE && enable && start_armed)
+            start_armed <= 1'b0;
+    end
+
+    wire manual_start = (state == LISTEN) && mode_key_press[0] &&
+                        !mode_key_press[1];
+    wire stop_request = (state == LISTEN) && mode_key_press[1];
+    wire processing = (state == LISTEN || state == MK_MSG);
+    // No packet may enter a transmitter on the STOP key's sampling edge.
+    wire allow_new_tx = processing && !stop_request;
+
+    wire [MSG_SIZE-1:0] manual_packet;
+    wire manual_valid, manual_busy;
+    logic manual_ready;
+    wire manual_handshake = manual_valid && manual_ready;
+
+    wire tx_ready [0:2];
+    wire all_tx_idle = tx_ready[0] && tx_ready[1] && tx_ready[2];
+
+    always_ff @(posedge clk) begin
+        if (rst)
+            state <= IDLE;
+        else
+            state <= new_state;
+    end
+
+    always_comb begin
+        new_state = state;
+        case (state)
+            IDLE:
+                if (enable && start_armed)
+                    new_state = LISTEN;
+            LISTEN:
+                if (mode_key_press[1])
+                    new_state = STOPPING;
+                else if (mode_key_press[0])
+                    new_state = MK_MSG;
+            MK_MSG:
+                // Manual mode cannot be interrupted using the stop key.
+                // Leave only when the packet was really accepted.
+                if (manual_handshake)
+                    new_state = LISTEN;
+            STOPPING:
+                if (all_tx_idle)
+                    new_state = IDLE;
+            default: new_state = IDLE;
+        endcase
+    end
+
+    // In STOPPING receivers are cleared, transmitters still run.
+    // In IDLE all datapath queues and transmitters are cleared.
+    wire rx_rst  = rst || (state == IDLE) || (state == STOPPING);
+    wire tx_rst  = rst || (state == IDLE);
+    wire man_rst = rst || (state == IDLE) || (state == STOPPING);
+
+    pac_maker #(
+        .MSG_SIZE(MSG_SIZE),
+        .CLK_MHZ(CLK_MHZ),
+        .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES)
+    ) creator (
+        .clk(clk),
+        .rst(man_rst),
+        .start(manual_start),
+        .keys(keys),
+        .sw(sw),
+        .my_addr(my_addr),
+        .packet(manual_packet),
+        .busy(manual_busy),
+        .valid(manual_valid),
+        .ready(manual_ready)
+    );
+
+    wire [MSG_SIZE-1:0] rx_packet [0:2];
     wire rx_valid [0:2], rx_ready [0:2];
     wire [MSG_SIZE-1:0] rx_head [0:2];
     wire rx_full [0:2], rx_empty [0:2];
@@ -28,30 +127,30 @@ module txrx #(
     wire [MSG_SIZE-1:0] tx_head [0:2];
     wire tx_full [0:2], tx_empty [0:2];
     logic tx_push [0:2];
+    logic tx_pop [0:2];
     wire [MSG_SIZE-1:0] tx_write_data [0:2];
-    wire tx_ready [0:2];
-    wire tx_pop [0:2];
+    wire [2:0] tx_serial;
 
     genvar p;
-    generate for (p = 0; p < 3; p = p + 1) begin: port_gen
+    generate for (p = 0; p < 3; p = p + 1) begin : port_gen
         receiver #(
             .MSG_SIZE(MSG_SIZE))
         u_rx (
             .clk(clk),
-            .rst(rst),
+            .rst(rx_rst),
             .data_in(data_in[p]),
             .valid(rx_valid[p]),
             .ready(rx_ready[p]),
             .packet(rx_packet[p])
         );
 
-        assign rx_ready[p] = !rx_full[p];
+        assign rx_ready[p] = allow_new_tx && !rx_full[p];
         fifo #(
             .width(MSG_SIZE),
             .depth(FIFO_DEPTH))
         u_rx_fifo (
             .clk(clk),
-            .rst(rst),
+            .rst(rx_rst),
             .push(rx_valid[p] && rx_ready[p]),
             .pop(rx_pop[p]),
             .write_data(rx_packet[p]),
@@ -65,7 +164,7 @@ module txrx #(
             .depth(FIFO_DEPTH))
         u_tx_fifo (
             .clk(clk),
-            .rst(rst),
+            .rst(tx_rst),
             .push(tx_push[p]),
             .pop(tx_pop[p]),
             .write_data(tx_write_data[p]),
@@ -73,60 +172,33 @@ module txrx #(
             .full(tx_full[p]),
             .empty(tx_empty[p])
         );
-
-        assign tx_pop[p] = tx_ready[p] && !tx_empty[p];
+        // On STOPPING no new packet starts, but the current one finishes.
+        always_comb begin
+            tx_pop[p] = allow_new_tx && tx_ready[p] && !tx_empty[p];
+        end
         transmitter #(
-            .MSG_SIZE(MSG_SIZE)) 
+        .MSG_SIZE(MSG_SIZE))
         u_tx (
             .clk(clk),
-            .rst(rst),
-            .valid(!tx_empty[p]),
+            .rst(tx_rst),
+            .valid(allow_new_tx && !tx_empty[p]),
             .ready(tx_ready[p]),
             .packet(tx_head[p]),
-            .data_out(data_out[p])
+            .data_out(tx_serial[p])
         );
+        assign tx_write_data[p] = edited_packet;
     end endgenerate
 
-    // Manual packet creator; key[1] triggers its start (debounced).
-    wire manual_start;
-    key_handler #(
-        .KEY_NUM(1),
-        .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES),
-        .ACTIVE_LOW(0))
-    start_button (
-        .clk(clk),
-        .rst(rst),
-        .keys(keys[1]),
-        .key_press(manual_start)
-    );
+    // Suppress the serial output only after entering IDLE.
+    assign data_out = (state == IDLE) ? 3'b000 : tx_serial;
 
-    wire [MSG_SIZE-1:0] manual_packet;
-    wire manual_valid, manual_busy;
-    logic manual_ready;
-    pac_maker #(
-        .MSG_SIZE(MSG_SIZE),
-        .CLK_MHZ(CLK_MHZ),
-        .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES))
-    creator (
-        .clk(clk),
-        .rst(rst),
-        .start(enable && manual_start),
-        .keys(keys),
-        .sw(sw),
-        .my_addr(my_addr),
-        .packet(manual_packet),
-        .busy(manual_busy),
-        .valid(manual_valid),
-        .ready(manual_ready)
-    );
-
-    // Round-robin over received FIFO heads; manual packets take priority.
+    // Input round-robin arbiter, with manual packet priority.
     logic [1:0] rr;
     logic selected_rx_valid;
     logic [1:0] selected_rx;
     logic [MSG_SIZE-1:0] selected_packet;
     logic selected_valid, accepted;
-    logic [MSG_SIZE-1:0] edited_packet;
+    wire [MSG_SIZE-1:0] edited_packet;
     wire is_local;
     wire route_ok;
 
@@ -144,7 +216,7 @@ module txrx #(
     end
 
     always_comb begin
-        selected_valid  = manual_valid || selected_rx_valid;
+        selected_valid = manual_valid || selected_rx_valid;
         selected_packet = '0;
         if (manual_valid)
             selected_packet = manual_packet;
@@ -152,20 +224,19 @@ module txrx #(
             selected_packet = rx_head[selected_rx];
     end
 
-    // Recomposer: normalize framing/reserved bit, preserve original SRC/DST/data.
     assign edited_packet = {3'b110, selected_packet[8:7], 1'b0,
                             selected_packet[5:2], 2'b10};
     assign dst_addr = selected_valid ? edited_packet[5:4] : 2'b00;
     assign is_local = (dst_addr == my_addr);
-    assign route_ok = (next_hop < 3);
+    assign route_ok = (next_hop < 2'd3);
 
     always_comb begin
         accepted = 1'b0;
-        if (enable && selected_valid) begin
+        if (allow_new_tx && selected_valid) begin
             if (is_local)
                 accepted = 1'b1;
-            else if (route_ok)
-                accepted = !tx_full[next_hop];
+            else if (route_ok && !tx_full[next_hop])
+                accepted = 1'b1;
         end
     end
 
@@ -179,32 +250,28 @@ module txrx #(
         end
     end
 
-    generate for (p = 0; p < 3; p = p + 1) begin: tx_input
-        assign tx_write_data[p] = edited_packet;
-    end endgenerate
-
-    // Placeholder for destination-local storage. Last received packet only.
     logic [MSG_SIZE-1:0] stored_packet;
     logic stored_flag;
     always_ff @(posedge clk) begin
-        if (rst) begin
+        if (rst || state == IDLE) begin
             rr <= 2'd0;
             stored_packet <= '0;
             stored_flag <= 1'b0;
         end else begin
             if (accepted && !manual_valid && selected_rx_valid)
-                rr <= (selected_rx == 2) ? 2'd0 : selected_rx + 1'b1;
+                rr <= (selected_rx == 2'd2) ? 2'd0 : selected_rx + 1'b1;
             if (accepted && is_local) begin
                 stored_packet <= edited_packet;
                 stored_flag <= 1'b1;
             end
         end
     end
+
     assign stored_valid = stored_flag;
     assign disp_data = {{(16-MSG_SIZE){1'b0}}, stored_packet};
-    assign stoped = !enable;
-    
+    assign stoped = (state == IDLE);
 endmodule
+
 
 /* module txrx 
 # (

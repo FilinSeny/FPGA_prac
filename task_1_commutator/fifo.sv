@@ -1,4 +1,51 @@
-module fifo
+module fifo #(
+    parameter int width = 1,
+    parameter int depth = 4
+)(
+    input  logic             clk,
+    input  logic             rst,
+    input  logic             push,
+    input  logic             pop,
+    input  logic [width-1:0] write_data,
+    output wire  [width-1:0] read_data,
+    output wire              empty,
+    output wire              full
+);
+    localparam int PTR_W = (depth > 1) ? $clog2(depth) : 1;
+    logic [PTR_W-1:0] wr_ptr, rd_ptr;
+    logic [PTR_W:0] count;
+    logic [width-1:0] data [0:depth-1];
+
+    assign empty = (count == 0);
+    assign full  = (count == depth);
+    assign read_data = data[rd_ptr];
+
+    wire do_pop  = pop  && !empty;
+    wire do_push = push && (!full || do_pop);
+
+    always_ff @(posedge clk or posedge rst) begin
+        if (rst) begin
+            wr_ptr <= '0;
+            rd_ptr <= '0;
+            count  <= '0;
+        end else begin
+            if (do_push) begin
+                data[wr_ptr] <= write_data;
+                wr_ptr <= (wr_ptr == depth-1) ? '0 : wr_ptr + 1'b1;
+            end
+            if (do_pop)
+                rd_ptr <= (rd_ptr == depth-1) ? '0 : rd_ptr + 1'b1;
+            case ({do_push, do_pop})
+                2'b10: count <= count + 1'b1;
+                2'b01: count <= count - 1'b1;
+                default: ;
+            endcase
+        end
+    end
+endmodule
+
+
+/*module fifo
 # (
     parameter width = 1, depth = 4
 )

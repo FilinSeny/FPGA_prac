@@ -85,7 +85,6 @@ module txrx #(
                     new_state = MK_MSG;
             MK_MSG:
                 // Manual mode cannot be interrupted using the stop key.
-                // Leave only when the packet was really accepted.
                 if (manual_handshake)
                     new_state = LISTEN;
             STOPPING:
@@ -96,7 +95,6 @@ module txrx #(
     end
 
     // In STOPPING receivers are cleared, transmitters still run.
-    // In IDLE all datapath queues and transmitters are cleared.
     wire rx_rst  = rst || (state == IDLE) || (state == STOPPING);
     wire tx_rst  = rst || (state == IDLE);
     wire man_rst = rst || (state == IDLE) || (state == STOPPING);
@@ -189,7 +187,6 @@ module txrx #(
         assign tx_write_data[p] = edited_packet;
     end endgenerate
 
-    // Suppress the serial output only after entering IDLE.
     assign data_out = (state == IDLE) ? 3'b000 : tx_serial;
 
     // Input round-robin arbiter, with manual packet priority.
@@ -204,24 +201,70 @@ module txrx #(
 
     always_comb begin
         selected_rx_valid = 1'b0;
-        selected_rx = 2'd0;
-        for (int off = 0; off < 3; off = off + 1) begin
-            int idx;
-            idx = (int'(rr) + off) % 3;
-            if (!selected_rx_valid && !rx_empty[idx]) begin
-                selected_rx_valid = 1'b1;
-                selected_rx = 2'(idx);
+        selected_rx       = 2'd0;
+
+        case (rr)
+            2'd0: begin
+                if (!rx_empty[0]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd0;
+                end else if (!rx_empty[1]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd1;
+                end else if (!rx_empty[2]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd2;
+                end
             end
-        end
+
+            2'd1: begin
+                if (!rx_empty[1]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd1;
+                end else if (!rx_empty[2]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd2;
+                end else if (!rx_empty[0]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd0;
+                end
+            end
+
+            2'd2: begin
+                if (!rx_empty[2]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd2;
+                end else if (!rx_empty[0]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd0;
+                end else if (!rx_empty[1]) begin
+                    selected_rx_valid = 1'b1;
+                    selected_rx = 2'd1;
+                end
+            end
+
+            default: begin
+                selected_rx_valid = 1'b0;
+                selected_rx = 2'd0;
+            end
+        endcase
     end
 
+    //Multiplexor between sources of package
     always_comb begin
         selected_valid = manual_valid || selected_rx_valid;
         selected_packet = '0;
-        if (manual_valid)
+
+        if (manual_valid) begin
             selected_packet = manual_packet;
-        else if (selected_rx_valid)
-            selected_packet = rx_head[selected_rx];
+        end else if (selected_rx_valid) begin
+            case (selected_rx)
+                2'd0: selected_packet = rx_head[0];
+                2'd1: selected_packet = rx_head[1];
+                2'd2: selected_packet = rx_head[2];
+                default: selected_packet = '0;
+            endcase
+        end
     end
 
     assign edited_packet = {3'b110, selected_packet[8:7], 1'b0,
@@ -240,15 +283,24 @@ module txrx #(
         end
     end
 
-    always_comb begin
-        manual_ready = accepted && manual_valid;
-        for (int i = 0; i < 3; i = i + 1) begin
-            rx_pop[i] = accepted && !manual_valid && selected_rx_valid &&
-                        (selected_rx == i);
-            tx_push[i] = accepted && !is_local && route_ok &&
-                         (next_hop == i);
+    assign manual_ready = accepted && manual_valid;
+
+    generate
+        for (genvar i = 0; i < 3; i++) begin : control_gen
+
+            assign rx_pop[i] =
+                accepted &&
+                !manual_valid &&
+                selected_rx_valid &&
+                (selected_rx == i);
+
+            assign tx_push[i] =
+                accepted &&
+                !is_local &&
+                route_ok &&
+                (next_hop == i);
         end
-    end
+    endgenerate
 
     logic [MSG_SIZE-1:0] stored_packet;
     logic stored_flag;
@@ -531,4 +583,4 @@ transmitter tx_0 #(
     .packet(pack_to_transmitter[0])
 );
 
-endmodule
+endmodule*/

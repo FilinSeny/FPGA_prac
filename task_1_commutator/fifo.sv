@@ -129,4 +129,4 @@ endmodule
 
     assign full = equal_ptrs & !same_circle;
 
-endmodule
+endmodule*/

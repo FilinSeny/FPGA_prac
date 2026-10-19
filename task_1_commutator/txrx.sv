@@ -17,7 +17,8 @@ module txrx #(
     output wire  [2:0] data_out,
     output wire        stoped,
     output wire [15:0] disp_data,
-    output wire        stored_valid
+    output wire        stored_valid,
+    output wire  [2:0] dst 
 );
     typedef enum logic [1:0] {
         IDLE     = 2'd0,

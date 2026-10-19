@@ -9,7 +9,12 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../seven_seg_disp.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../ram.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../commutator.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../key_handler.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../txrx.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../transmitter.sv
 set_global_assignment -name MISC_FILE ../data/config.mem
+set_global_assignment -name SYSTEMVERILOG_FILE ../receiver.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../pac_maker.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../fifo.sv
 
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0

@@ -23,8 +23,6 @@ module commutator #(
         LOAD_HOP   = 5'd7,
         SEND_PACK  = 5'd8,
         SHOW_RAM   = 5'd9,
-        ENTER_MSG  = 5'd10,
-        RESEND_MSG = 5'd11,
         TXRX_MODE  = 5'd12
     } state_t;
 
@@ -37,10 +35,14 @@ module commutator #(
     logic [1:0] key_press;
 
     wire        txrx_enable;
+
     wire [1:0]  port;
+    assign port = next_hop;
+
     wire        txrx_stoped;
     wire [15:0] txrx_disp;
     wire        has_stored_packet;
+    wire [1:0]  tx_dsp;
 
     key_handler #(
         .KEY_NUM(2),
@@ -52,6 +54,16 @@ module commutator #(
         .keys(keys),
         .key_press(key_press)
     );
+
+    logic [1:0] sync_dst_reg, async_dst;
+    always_comb begin
+        case(state)
+            TXRX_MODE, LISTEN:
+                dst_reg = async_dst;
+            default:
+                dst_reg = sync_dst_reg;
+        endcase
+    end
 
     ram #(.ADDR_WIDTH(3)) addr_tab (
         .clk(clk),
@@ -76,7 +88,7 @@ module commutator #(
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            dst_reg   <= '0;
+            sync_dst_reg   <= '0;
             hop_reg_w <= '0;
             ram_addr  <= '0;  
         end else begin
@@ -85,11 +97,11 @@ module commutator #(
             else 
                 ram_addr <= '0;
             if (state == CONFIG_DST)
-                dst_reg <= switch_reg;
+                sync_dst_reg <= switch_reg;
             if (state == CONFIG_HOP)
                 hop_reg_w <= switch_reg;
             if (state == SHOW_RAM)
-                dst_reg <= ram_addr;
+                sync_dst_reg <= ram_addr;
         end
     end
 
@@ -133,7 +145,7 @@ module commutator #(
     always_comb begin
         case (state)
             CONFIG_DST, CONFIG_HOP: display_addr = switch_reg;
-            default:                display_addr = dst_reg;
+            default:                display_addr = sync_dst_reg;
         endcase
     end
 
@@ -187,7 +199,8 @@ module commutator #(
         .stoped(txrx_stoped),
         .disp_data(txrx_disp),
 
-        .stored_valid(has_stored_packet)
+        .stored_valid(has_stored_packet),
+        .dst_addr(tx_dsp);
     );
 
 

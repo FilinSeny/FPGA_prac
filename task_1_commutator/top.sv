@@ -7,8 +7,8 @@ module top #(
     input  wire [1:0] KEY,  
     input  wire [1:0] SW,
 
-    output wire       DATA_OUT,
-    output wire       DATA_IN,
+    output wire [2:0] DATA_OUT,
+    output wire [2:0] DATA_IN,
     output wire [3:0] LED,
     output wire [7:0] SEG,
     output wire [3:0] DIG
@@ -53,7 +53,7 @@ module top #(
         .data_in(data_in),
         .data_out(data_out),
 
-        
+
     );
 
     ///assign SEG = ~abcdefgh;

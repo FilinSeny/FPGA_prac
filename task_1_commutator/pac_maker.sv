@@ -18,12 +18,13 @@ module pac_maker #(
     output logic                 busy,
     output logic                 valid,
 
-    output wire [MSG_SIZE-1:0]   pac_maker_disp
+    output logic [MSG_SIZE-1:0]   pac_maker_disp
 );
 
     logic [1:0] key_press;
+    assign key_press = keys;
 
-    key_handler #(
+    /*key_handler #(
         .KEY_NUM(2),
         .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES),
         .ACTIVE_LOW(0)
@@ -32,7 +33,7 @@ module pac_maker #(
         .rst(rst),
         .keys(keys),
         .key_press(key_press)
-    );
+    );*/
 
     logic [1:0] target_addr;
     logic [1:0] payload;

@@ -16,9 +16,9 @@ module txrx #(
 
     output wire  [2:0] data_out,
     output wire        stoped,
-    output wire [15:0] disp_data,
+    output logic [15:0]disp_data,
     output wire        stored_valid,
-    output wire  [2:0] dst 
+    output wire  [1:0] dst_addr 
 );
     typedef enum logic [1:0] {
         IDLE     = 2'd0,
@@ -28,7 +28,8 @@ module txrx #(
     } state_t;
     state_t state, new_state;
 
-    logic [1:0] mode_key_press = keys;
+    logic [1:0] mode_key_press; 
+    assign mode_key_press = keys;
 
     logic start_armed;
     always_ff @(posedge clk) begin
@@ -107,7 +108,7 @@ module txrx #(
         .valid(manual_valid),
         .ready(manual_ready),
 
-        .disp_data(pac_maker_disp)
+        .pac_maker_disp(pac_maker_disp)
     );
 
     wire [MSG_SIZE-1:0] rx_packet [0:2];
@@ -261,28 +262,28 @@ module txrx #(
         end
     end
 
-    logic [1:0] dst_addr
-
     assign edited_packet = {3'b110, selected_packet[8:7], 1'b0,
                             selected_packet[5:2], 2'b10};
     assign dst_addr = selected_valid ? edited_packet[5:4] : 2'b00;
     assign is_local = (dst_addr == my_addr);
-    assign route_ok = (next_hop < 2'd3);
+    assign route_ok = (port < 2'd3);
 
     always_comb begin
         accepted = 1'b0;
         if (allow_new_tx && selected_valid) begin
             if (is_local)
                 accepted = 1'b1;
-            else if (route_ok && !tx_full[next_hop])
+            else if (route_ok && !tx_full[port])
                 accepted = 1'b1;
         end
     end
 
     assign manual_ready = accepted && manual_valid;
 
+    genvar i;
+
     generate
-        for (genvar i = 0; i < 3; i++) begin : control_gen
+        for (i = 0; i < 3; i++) begin : control_gen
 
             assign rx_pop[i] =
                 accepted &&
@@ -294,7 +295,7 @@ module txrx #(
                 accepted &&
                 !is_local &&
                 route_ok &&
-                (next_hop == i);
+                (port == i);
         end
     endgenerate
 

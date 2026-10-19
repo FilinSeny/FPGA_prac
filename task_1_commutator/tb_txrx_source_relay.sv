@@ -24,7 +24,7 @@ module tb_txrx_source_relay;
     txrx #(.MSG_SIZE(MSG_SIZE), .DEBOUNCE_CYCLES(DEBOUNCE), .FIFO_DEPTH(8)) node_a (
         .clk(clk), .rst(rst), .enable(enable_a),
         .keys(keys_a), .sw(sw_a), .data_in(in_a),
-        .my_addr(ADDR_A), .next_hop(2'd0), .dst_addr(dst_a),
+        .my_addr(ADDR_A), .port(2'd0), .dst_addr(dst_a),
         .data_out(out_a), .stoped(stopped_a),
         .disp_data(display_a), .stored_valid(stored_a)
     );
@@ -33,7 +33,7 @@ module tb_txrx_source_relay;
     txrx #(.MSG_SIZE(MSG_SIZE), .DEBOUNCE_CYCLES(DEBOUNCE), .FIFO_DEPTH(8)) node_b (
         .clk(clk), .rst(rst), .enable(enable_b),
         .keys(keys_b), .sw(sw_b), .data_in(in_b),
-        .my_addr(ADDR_B), .next_hop(2'd1), .dst_addr(dst_b),
+        .my_addr(ADDR_B), .port(2'd1), .dst_addr(dst_b),
         .data_out(out_b), .stoped(stopped_b),
         .disp_data(display_b), .stored_valid(stored_b)
     );
@@ -64,9 +64,9 @@ module tb_txrx_source_relay;
     // Debounced 1-clock key_press; keep each press/release long enough.
     task automatic press_a(input integer key_no);
         @(negedge clk); keys_a[key_no] = 1'b1;
-        repeat (9) @(negedge clk);
+        repeat (1) @(negedge clk);
         keys_a[key_no] = 1'b0;
-        repeat (9) @(negedge clk);
+        repeat (1) @(negedge clk);
     endtask
 
     task automatic send_manual_a(

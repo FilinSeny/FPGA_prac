@@ -28,7 +28,7 @@ module commutator #(
 
     state_t     state, new_state;
     logic [2:0] dst_reg, hop_reg_w;
-    wire  [2:0] next_hop, my_addr;
+    wire  [1:0] next_hop, my_addr;
     wire valid_mem;
     wire we_mem = (state == UPD_RAM) && !rst;
 
@@ -65,7 +65,7 @@ module commutator #(
         endcase
     end
 
-    ram #(.ADDR_WIDTH(3)) addr_tab (
+    ram #(.ADDR_WIDTH(2)) addr_tab (
         .clk(clk),
         .rst(rst),
         .addr(dst_reg),
@@ -138,7 +138,7 @@ module commutator #(
         endcase
     end
 
-    assign txrx_enable = (state == TXRX_MODE || state = LISTEN);
+    assign txrx_enable = (state == LISTEN);
 
     logic [2:0] display_addr;
     logic [15:0] display_number;
@@ -190,7 +190,7 @@ module commutator #(
 
         .enable(txrx_enable),
         .keys(key_press),
-        .sw(sw),
+        .sw(switch_reg[1:0]),
         .data_in(data_in),
         .my_addr(my_addr),
         .port(port),
@@ -200,7 +200,7 @@ module commutator #(
         .disp_data(txrx_disp),
 
         .stored_valid(has_stored_packet),
-        .dst_addr(tx_dsp);
+        .dst_addr(tx_dsp)
     );
 
 

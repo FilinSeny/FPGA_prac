@@ -8,7 +8,7 @@ module top #(
     input  wire [1:0] SW,
 
     output wire [2:0] DATA_OUT,
-    output wire [2:0] DATA_IN,
+    input  wire [2:0] DATA_IN,
     output wire [3:0] LED,
     output wire [7:0] SEG,
     output wire [3:0] DIG
@@ -26,17 +26,6 @@ module top #(
             reset_pipe <= {reset_pipe[0], 1'b0};
     end
     wire rst = reset_pipe[1];
-
-    (* async_reg = "true" *) logic [2:0] address_meta, address_bits;
-    always_ff @(posedge CLK) begin
-        if (rst) begin
-            address_meta <= '0;
-            address_bits <= '0;
-        end else begin
-            address_meta[1:0] <= ~SW[1:0];
-            address_bits[1:0] <= address_meta[1:0];
-        end
-    end
 
     wire [7:0] abcdefgh;
     wire [3:0] digit;

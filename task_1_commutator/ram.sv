@@ -1,5 +1,5 @@
 module ram #(
-    parameter int ADDR_WIDTH = 3
+    parameter int ADDR_WIDTH = 2
 ) (
     input  logic [ADDR_WIDTH-1:0] data_in,
     input  logic [ADDR_WIDTH-1:0] addr,

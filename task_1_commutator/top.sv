@@ -51,7 +51,9 @@ module top #(
         .abcdefgh(SEG),
         .digit(DIG),
         .data_in(data_in),
-        .data_out(data_out)
+        .data_out(data_out),
+
+        
     );
 
     ///assign SEG = ~abcdefgh;

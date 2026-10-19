@@ -116,7 +116,7 @@ module tb_txrx_source_relay;
             $fatal(1, "Could not start nodes: A=%b B=%b", stopped_a, stopped_b);
         $display("PASS: both nodes entered LISTEN");
 
-        // Test 1: A(1) -> B(2). B stores packet, MUST NOT forward it.
+        // Test 1: A(1) -> B(2)
         send_manual_a(ADDR_B, 2'b01);
         await_b_local(DIRECT_PKT);
         if (monitor_count != 0)
@@ -124,7 +124,7 @@ module tb_txrx_source_relay;
         $display("PASS: A -> B local delivery, B stored %b", display_b[11:0]);
         repeat (5) @(negedge clk);
 
-        // Test 2: A(1) -> C(3) via B(2), with B forward to physical port 1.
+        // Test 2: A(1) -> C(3) via B(2)
         send_manual_a(ADDR_C, 2'b10);
         await_transit();
         if (display_b[11:0] !== DIRECT_PKT)

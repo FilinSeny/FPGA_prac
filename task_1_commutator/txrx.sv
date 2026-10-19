@@ -12,9 +12,8 @@ module txrx #(
     input  logic [1:0] sw,
     input  logic [2:0] data_in,
     input  logic [1:0] my_addr,
-    input  logic [1:0] next_hop,
+    input  logic [1:0] port,
 
-    output logic [1:0] dst_addr,
     output wire  [2:0] data_out,
     output wire        stoped,
     output wire [15:0] disp_data,
@@ -28,17 +27,7 @@ module txrx #(
     } state_t;
     state_t state, new_state;
 
-    logic [1:0] mode_key_press;
-    key_handler #(
-        .KEY_NUM(2),
-        .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES),
-        .ACTIVE_LOW(0)
-    ) mode_buttons (
-        .clk(clk),
-        .rst(rst),
-        .keys(keys),
-        .key_press(mode_key_press)
-    );
+    logic [1:0] mode_key_press = keys;
 
     logic start_armed;
     always_ff @(posedge clk) begin
@@ -99,6 +88,8 @@ module txrx #(
     wire tx_rst  = rst || (state == IDLE);
     wire man_rst = rst || (state == IDLE) || (state == STOPPING);
 
+    wire[MSG_SIZE-1:0] pac_maker_disp;
+
     pac_maker #(
         .MSG_SIZE(MSG_SIZE),
         .CLK_MHZ(CLK_MHZ),
@@ -113,7 +104,9 @@ module txrx #(
         .packet(manual_packet),
         .busy(manual_busy),
         .valid(manual_valid),
-        .ready(manual_ready)
+        .ready(manual_ready),
+
+        .disp_data(pac_maker_disp)
     );
 
     wire [MSG_SIZE-1:0] rx_packet [0:2];
@@ -267,6 +260,8 @@ module txrx #(
         end
     end
 
+    logic [1:0] dst_addr
+
     assign edited_packet = {3'b110, selected_packet[8:7], 1'b0,
                             selected_packet[5:2], 2'b10};
     assign dst_addr = selected_valid ? edited_packet[5:4] : 2'b00;
@@ -302,6 +297,7 @@ module txrx #(
         end
     endgenerate
 
+    //Storage for 1 packet
     logic [MSG_SIZE-1:0] stored_packet;
     logic stored_flag;
     always_ff @(posedge clk) begin
@@ -320,7 +316,11 @@ module txrx #(
     end
 
     assign stored_valid = stored_flag;
-    assign disp_data = {{(16-MSG_SIZE){1'b0}}, stored_packet};
+
+    assign disp_data = state == MK_MSG 
+                       ? pac_maker_disp
+                       : {{(16-MSG_SIZE){1'b0}}, stored_packet};
+
     assign stoped = (state == IDLE);
 endmodule
 

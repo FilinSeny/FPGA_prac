@@ -16,7 +16,9 @@ module pac_maker #(
 
     output wire [MSG_SIZE-1:0]   packet,
     output logic                 busy,
-    output logic                 valid
+    output logic                 valid,
+
+    output wire [MSG_SIZE-1:0]   pac_maker_disp
 );
 
     logic [1:0] key_press;
@@ -69,26 +71,29 @@ module pac_maker #(
 
     always_comb begin
         new_state = state;
-
+        pac_maker_disp = '0;
         case (state)
-            IDLE:
-                if (start)
+            IDLE: begin
+                pac_maker_disp = {4'hc, 4'hd, 8'd16};
+                if (start) begin
                     new_state = CONFIG_DST;
-
-            CONFIG_DST:
+                end
+            end
+            CONFIG_DST: begin
+                pac_maker_disp = {4'hc, 4'hd, 6'd2, sw};
                 if (key_press[0])
                     new_state = CONFIG_PAYLOAD;
-
-            CONFIG_PAYLOAD:
+            end
+            CONFIG_PAYLOAD: begin
+                pac_maker_disp = {4'hc, 4'hd, 6'd3, sw};
                 if (key_press[0])
                     new_state = DONE;
-
-            DONE:
+            end
+            DONE: begin
+                pac_maker_disp = {4'hc, 4'hd, 4'd3, 4'd0};
                 if (ready)
                     new_state = IDLE;
-
-            default:
-                new_state = IDLE;
+            end
         endcase
     end
 

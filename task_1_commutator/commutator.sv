@@ -6,9 +6,9 @@ module commutator #(
     input  logic       rst,
     input  logic [1:0] keys,
     input  logic [2:0] switch_reg,
-    input  logic       data_in,
+    input  logic [2:0] data_in,
     
-    output logic       data_out,
+    output logic [2:0] data_out,
     output logic [7:0] abcdefgh,
     output wire  [3:0] digit
 );
@@ -35,6 +35,12 @@ module commutator #(
     wire we_mem = (state == UPD_RAM) && !rst;
 
     logic [1:0] key_press;
+
+    wire        txrx_enable;
+    wire [1:0]  port;
+    wire        txrx_stoped;
+    wire [15:0] txrx_disp;
+    wire        has_stored_packet;
 
     key_handler #(
         .KEY_NUM(2),
@@ -102,7 +108,7 @@ module commutator #(
             CONFIG_DST: if (key_press[0]) new_state = CONFIG_HOP;
             CONFIG_HOP: if (key_press[0]) new_state = UPD_RAM;
             UPD_RAM:    new_state = IDLE;
-            LISTEN:     if (key_press[0]) new_state = IDLE;
+            LISTEN:     if (txrx_stoped) new_state = IDLE;
             SHOW_RAM:   begin
                 if (key_press[0]) begin
                     if (ram_addr == 3) new_state = IDLE;
@@ -115,11 +121,12 @@ module commutator #(
                 if (key_press[0]) new_state = LISTEN;
 
             end
-            // Packet processing and entry into LISTEN are still to be implemented.
 
             ///default:    new_state = IDLE;
         endcase
     end
+
+    assign txrx_enable = (state == TXRX_MODE || state = LISTEN);
 
     logic [2:0] display_addr;
     logic [15:0] display_number;
@@ -146,6 +153,8 @@ module commutator #(
                                    state_ones,
                                    2'b0, ram_addr,
                                    1'b0, next_hop};
+            LISTEN, TXRX_MODE:
+                display_number = txrx_disp;
             default:   
                 display_number = {state_tens, state_ones, 8'd0};
         endcase
@@ -158,6 +167,27 @@ module commutator #(
         .dots(4'b0000),
         .abcdefgh(abcdefgh),
         .digit(digit)
+    );
+
+    txrx #(
+        .CLK_MHZ(CLK_MHZ),
+        .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES)
+    ) packet_processor (
+        .clk(clk),
+        .rst(rst),
+
+        .enable(txrx_enable),
+        .keys(key_press),
+        .sw(sw),
+        .data_in(data_in),
+        .my_addr(my_addr),
+        .port(port),
+
+        .data_out(data_out),
+        .stoped(txrx_stoped),
+        .disp_data(txrx_disp),
+
+        .stored_valid(has_stored_packet)
     );
 
 

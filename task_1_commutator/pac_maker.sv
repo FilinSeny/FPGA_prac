@@ -18,7 +18,7 @@ module pac_maker #(
     output logic                 busy,
     output logic                 valid,
 
-    output logic [MSG_SIZE-1:0]   pac_maker_disp
+    output logic [15:0]   pac_maker_disp
 );
 
     logic [1:0] key_press;
@@ -75,18 +75,18 @@ module pac_maker #(
         pac_maker_disp = '0;
         case (state)
             IDLE: begin
-                pac_maker_disp = {4'hc, 4'hd, 8'd16};
+                pac_maker_disp = {4'hc, 4'hd, 8'd0};
                 if (start) begin
                     new_state = CONFIG_DST;
                 end
             end
             CONFIG_DST: begin
-                pac_maker_disp = {4'hc, 4'hd, 6'd2, sw};
+                pac_maker_disp = {4'hc, 4'hd, 6'd4, sw};
                 if (key_press[0])
                     new_state = CONFIG_PAYLOAD;
             end
             CONFIG_PAYLOAD: begin
-                pac_maker_disp = {4'hc, 4'hd, 6'd3, sw};
+                pac_maker_disp = {4'hc, 4'hd, 6'd8, sw};
                 if (key_press[0])
                     new_state = DONE;
             end

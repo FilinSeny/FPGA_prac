@@ -5,7 +5,7 @@ module commutator #(
     input  logic       clk,
     input  logic       rst,
     input  logic [1:0] keys,
-    input  logic [2:0] switch_reg,
+    input  logic [1:0] switch_reg,
     input  logic [2:0] data_in,
     
     output logic [2:0] data_out,
@@ -27,7 +27,7 @@ module commutator #(
     } state_t;
 
     state_t     state, new_state;
-    logic [2:0] dst_reg, hop_reg_w;
+    logic [1:0] dst_reg, hop_reg_w;
     wire  [1:0] next_hop, my_addr;
     wire valid_mem;
     wire we_mem = (state == UPD_RAM) && !rst;
@@ -65,7 +65,9 @@ module commutator #(
         endcase
     end
 
-    ram #(.ADDR_WIDTH(2)) addr_tab (
+    ram #(
+        .ADDR_WIDTH(2)
+    ) addr_tab (
         .clk(clk),
         .rst(rst),
         .addr(dst_reg),
@@ -164,8 +166,8 @@ module commutator #(
                 display_number =  {state_tens, 
                                    state_ones,
                                    2'b0, ram_addr,
-                                   1'b0, next_hop};
-            LISTEN, TXRX_MODE:
+                                   2'b0, next_hop};
+            LISTEN:
                 display_number = txrx_disp;
             default:   
                 display_number = {state_tens, state_ones, 8'd0};

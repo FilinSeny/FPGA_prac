@@ -321,9 +321,9 @@ module txrx #(
 
     assign disp_data = state == MK_MSG 
                        ? pac_maker_disp
-                       : {{(16-MSG_SIZE){1'b0}}, stored_packet};
+                       : 16'hffff; //{{(16-MSG_SIZE){1'b0}}, stored_packet};
 
-    assign stoped = (state == IDLE);
+    assign stoped = (new_state == IDLE && state == STOPPING);
 endmodule
 
 

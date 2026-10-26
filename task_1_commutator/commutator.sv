@@ -57,14 +57,16 @@ module commutator #(
 
     logic [1:0] sync_dst_reg, async_dst;
     always_comb begin
-        case(state)
+        case (state)
             TXRX_MODE, LISTEN:
-                dst_reg = async_dst;
+                dst_reg = tx_dsp;
             default:
                 dst_reg = sync_dst_reg;
         endcase
     end
 
+    logic[1:0] dst_reg_, hop_reg_w_, next_hop_, my_addr_;
+    logic valid_mem_, we_mem_;
     ram #(
         .ADDR_WIDTH(2)
     ) addr_tab (

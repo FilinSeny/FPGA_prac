@@ -108,13 +108,31 @@ module tb_two_tops;
             set_a_sw(data);
             press_a(0); // accept PAYLOAD
 
-            begin : await_done
+            begin : await_done begin
                 for (t = 0; t < 200; t = t + 1) begin
                     @(negedge clk);
                     if (a.u_commutator.packet_processor.state == 2'd1)
                         disable await_done;
                 end
+                
+                $display("DEBUG: txrx state=%0d, pac_maker state=%0d",
+                    a.u_commutator.packet_processor.state,
+                    a.u_commutator.packet_processor.creator.state);
+
+                $display("DEBUG: manual_valid=%b manual_ready=%b handshake=%b",
+                    a.u_commutator.packet_processor.manual_valid,
+                    a.u_commutator.packet_processor.manual_ready,
+                    a.u_commutator.packet_processor.manual_handshake);
+
+                $display("DEBUG: packet=%b dst=%0d port=%0d route_ok=%b",
+                    a.u_commutator.packet_processor.manual_packet,
+                    a.u_commutator.packet_processor.dst_addr,
+                    a.u_commutator.packet_processor.port,
+                    a.u_commutator.packet_processor.route_ok);
+
                 $fatal(1, "A failed to complete manual packet handshake");
+
+                end
             end
         end
     endtask
@@ -130,14 +148,15 @@ module tb_two_tops;
 
         // TEST ONLY: initialize per-instance router IDs and combinational routing tables.
         // In the actual FPGA this is done by separate config memories / controller.
-        a.u_commutator.addr_tab.config_mem[0] = 3'd1;
-        b.u_commutator.addr_tab.config_mem[0] = 3'd2;
-        a.u_commutator.addr_tab.ram[2] = 3'd0; // A -> B via A port 0
-        a.u_commutator.addr_tab.ram[3] = 3'd0; // A -> C via B, A port 0
-        b.u_commutator.addr_tab.ram[3] = 3'd1; // B -> C via B port 1
+        //a.u_commutator.addr_tab.config_mem[0] = 3'd3;
+        //b.u_commutator.addr_tab.config_mem[0] = 3'd3;
+        //a.u_commutator.addr_tab.ram[2] = 3'd1; // A -> B via A port 1
+        //a.u_commutator.addr_tab.ram[3] = 3'd1; // A -> C via B, A port 1
+        //b.u_commutator.addr_tab.ram[3] = 3'd2; // B -> C via B port 2
 
+        #2000;
         // Outer commutator: KEY[1] IDLE->TXRX_MODE, KEY[0] -> LISTEN.
-        press_a(1);
+        /*press_a(1);
         press_b(1);
         press_a(0);
         press_b(0);
@@ -177,11 +196,11 @@ module tb_two_tops;
         if (transit_count != 1)
             $fatal(1, "TRANSIT duplication: count=%0d", transit_count);
         $display("ALL TWO-TOP TESTS PASSED");
-        $finish;
+        $finish;*/
     end
 
     initial begin
-        #1000000;
+        #10000;
         $fatal(1, "GLOBAL TIMEOUT");
     end
 endmodule

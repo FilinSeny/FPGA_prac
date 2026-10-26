@@ -112,8 +112,25 @@ module tb_txrx_source_relay;
         enable_a = 1'b1;
         enable_b = 1'b1;
         repeat (6) @(negedge clk);
-        if (stopped_a || stopped_b)
-            $fatal(1, "Could not start nodes: A=%b B=%b", stopped_a, stopped_b);
+        if (stopped_a || stopped_b) begin
+            $display("DEBUG: txrx state=%0d, pac_maker state=%0d",
+                a.u_commutator.packet_processor.state,
+                a.u_commutator.packet_processor.creator.state);
+
+            $display("DEBUG: manual_valid=%b manual_ready=%b handshake=%b",
+                a.u_commutator.packet_processor.manual_valid,
+                a.u_commutator.packet_processor.manual_ready,
+                a.u_commutator.packet_processor.manual_handshake);
+
+            $display("DEBUG: packet=%b dst=%0d port=%0d route_ok=%b",
+                a.u_commutator.packet_processor.manual_packet,
+                a.u_commutator.packet_processor.dst_addr,
+                a.u_commutator.packet_processor.port,
+                a.u_commutator.packet_processor.route_ok);
+
+            $fatal(1, "A failed to complete manual packet handshake");
+        end
+            
         $display("PASS: both nodes entered LISTEN");
 
         // Test 1: A(1) -> B(2)

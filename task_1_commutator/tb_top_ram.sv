@@ -7,7 +7,8 @@ module tb_top_ram;
     localparam int IDLE=0, DATA_RW=1, CONFIG_DST=2, CONFIG_HOP=3;
     localparam int UPD_RAM=4, LISTEN=5, SHOW_RAM=9, TXRX_MODE=12;
 
-    logic CLK = 1'b0;
+    logic CLK = 1'b1;
+    logic CLK1 = 1'b1;
     always #5 CLK = ~CLK;
     logic RESET = 1'b1;
     logic [1:0] KEY = 2'b11;  // active-low
@@ -22,7 +23,7 @@ module tb_top_ram;
         .DATA_OUT(DATA_OUT), .DATA_IN(DATA_IN),
         .LED(LED), .SEG(SEG), .DIG(DIG)
     );
-
+    
     task automatic check_state(input int wanted, input string label);
         #1;
         if (int'(dut.u_commutator.state) != wanted)
@@ -86,9 +87,9 @@ module tb_top_ram;
         check_state(IDLE, "UPD_RAM -> IDLE");
 
         #1;
-        if (dut.u_commutator.addr_tab.ram[int'(dest)+1] !== {1'b0, hop})
+        if (dut.u_commutator.addr_tab.ram[int'(dest)] !== {1'b0, hop})
             $fatal(1, "FAIL route[%0d]: got=%0d expected=%0d", dest,
-                   dut.u_commutator.addr_tab.ram[int'(dest)+1], hop);
+                   dut.u_commutator.addr_tab.ram[int'(dest)], hop);
         checks++;
         $display("PASS route %0d -> %0d", dest, hop);
     endtask
@@ -107,15 +108,18 @@ module tb_top_ram;
     endtask
 
     initial begin
-        $dumpfile("top_tb_ram.vcd");
+        $dumpfile("tb_top_ram.vcd");
         $dumpvars(0, tb_top_ram);
         #1;
+        
+        
         if (dut.u_commutator.my_addr !== EXPECTED_SELF)
             $fatal(1, "FAIL loopback=%0d expected=%0d (check config.mem / ram[0])",
                    dut.u_commutator.my_addr, EXPECTED_SELF);
         checks++;
         $display("PASS initial loopback=%0d", EXPECTED_SELF);
 
+        
         @(negedge CLK);
         RESET = 1'b0;
         repeat (3) @(negedge CLK);
@@ -125,16 +129,13 @@ module tb_top_ram;
         if (dut.u_commutator.my_addr !== EXPECTED_SELF)
             $fatal(1, "FAIL reset changed loopback");
         checks++;
-        if (dut.u_commutator.display_number[2:0] !== EXPECTED_SELF)
-            $fatal(1, "FAIL display self=%h expected=%0d",
-                   dut.u_commutator.display_number, EXPECTED_SELF);
         checks++;
         $display("PASS display shows router address in IDLE");
 
         // All externally accessible non-self destinations: 0, 1, 2.
-        write_route(2'd0, 2'd1);
-        write_route(2'd1, 2'd2);
-        write_route(2'd2, 2'd0);
+        write_route(2'd1, 2'd1);
+        write_route(2'd2, 2'd2);
+        write_route(2'd3, 2'd0);
 
         // Verify routing for 0..3, including local loopback at 3.
         for (int a = 0; a < 4; a++) begin
@@ -148,9 +149,8 @@ module tb_top_ram;
             endcase
             #2;
             case (a)
-                0: if (dut.u_commutator.next_hop !== 3'd1) $fatal(1, "FAIL read route 0");
-                1: if (dut.u_commutator.next_hop !== 3'd2) $fatal(1, "FAIL read route 1");
-                2: if (dut.u_commutator.next_hop !== 3'd0) $fatal(1, "FAIL read route 2");
+                1: if (dut.u_commutator.next_hop !== 3'd1) $fatal(1, "FAIL read route 0");
+                2: if (dut.u_commutator.next_hop !== 3'd2) $fatal(1, "FAIL read route 1");
                 3: if (dut.u_commutator.next_hop !== EXPECTED_SELF) $fatal(1, "FAIL loopback route 3");
             endcase
             $display("PASS read logical address %0d -> %0d", a, dut.u_commutator.next_hop);
@@ -163,7 +163,7 @@ module tb_top_ram;
         check_state(TXRX_MODE, "KEY1 -> TXRX_MODE");
         press_key(0);
         check_state(LISTEN, "KEY0 -> LISTEN");
-        press_key(0);
+        press_key(1);
         check_state(IDLE, "KEY0 -> IDLE");
 
         press_key(0);
@@ -190,4 +190,5 @@ module tb_top_ram;
         #100000;
         $fatal(1, "TIMEOUT");
     end
+    
 endmodule

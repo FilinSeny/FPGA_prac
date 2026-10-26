@@ -90,7 +90,7 @@ module txrx #(
     wire tx_rst  = rst || (state == IDLE);
     wire man_rst = rst || (state == IDLE) || (state == STOPPING);
 
-    wire[MSG_SIZE-1:0] pac_maker_disp;
+    wire[15:0] pac_maker_disp;
 
     pac_maker #(
         .MSG_SIZE(MSG_SIZE),
@@ -193,6 +193,7 @@ module txrx #(
     wire [MSG_SIZE-1:0] edited_packet;
     wire is_local;
     wire route_ok;
+    wire [1:0] physical_port = port[1:0] - 2'd1;
 
     always_comb begin
         selected_rx_valid = 1'b0;
@@ -266,14 +267,14 @@ module txrx #(
                             selected_packet[5:2], 2'b10};
     assign dst_addr = selected_valid ? edited_packet[5:4] : 2'b00;
     assign is_local = (dst_addr == my_addr);
-    assign route_ok = (port < 2'd3);
+    assign route_ok = (port >= 3'd1) && (port <= 3'd3);
 
     always_comb begin
         accepted = 1'b0;
         if (allow_new_tx && selected_valid) begin
             if (is_local)
                 accepted = 1'b1;
-            else if (route_ok && !tx_full[port])
+            else if (route_ok && !tx_full[physical_port])
                 accepted = 1'b1;
         end
     end
@@ -295,7 +296,7 @@ module txrx #(
                 accepted &&
                 !is_local &&
                 route_ok &&
-                (port == i);
+                (physical_port == i);
         end
     endgenerate
 

@@ -146,17 +146,37 @@ module tb_two_tops;
         reset_n = 1'b1;
         repeat (8) @(negedge clk);
 
-        // TEST ONLY: initialize per-instance router IDs and combinational routing tables.
-        // In the actual FPGA this is done by separate config memories / controller.
-        //a.u_commutator.addr_tab.config_mem[0] = 3'd3;
-        //b.u_commutator.addr_tab.config_mem[0] = 3'd3;
-        //a.u_commutator.addr_tab.ram[2] = 3'd1; // A -> B via A port 1
-        //a.u_commutator.addr_tab.ram[3] = 3'd1; // A -> C via B, A port 1
-        //b.u_commutator.addr_tab.ram[3] = 3'd2; // B -> C via B port 2
+        // In Icarus, hierarchical writes to config_mem[0] sometimes do not
+        // propagate through `assign loopback = config_mem[0]`.
+        // Force only the two router IDs; data path and routing remain real RTL.
+        force a.u_commutator.addr_tab.loopback = 2'd1;
+        force b.u_commutator.addr_tab.loopback = 2'd2;
 
-        #2000;
+        // RAM stores logical ports 1..3; TX bus indices are 0..2.
+        // RAM is addressed DIRECTLY by destination in current ram.sv.
+        a.u_commutator.addr_tab.ram[2] = 2'd1; // A -> B, physical TX[0]
+        a.u_commutator.addr_tab.ram[3] = 2'd1; // A -> C, physical TX[0]
+        b.u_commutator.addr_tab.ram[3] = 2'd2; // B -> C, physical TX[1]
+
+        #2;
+        $display("INIT A: loopback=%b my_addr=%b route[2]=%b route[3]=%b",
+            a.u_commutator.addr_tab.loopback,
+            a.u_commutator.my_addr,
+            a.u_commutator.addr_tab.ram[2],
+            a.u_commutator.addr_tab.ram[3]);
+        $display("INIT B: loopback=%b my_addr=%b route[3]=%b",
+            b.u_commutator.addr_tab.loopback,
+            b.u_commutator.my_addr,
+            b.u_commutator.addr_tab.ram[3]);
+        if (a.u_commutator.my_addr !== 2'd1 || b.u_commutator.my_addr !== 2'd2)
+            $fatal(1, "Router ID propagation failed");
+        if (a.u_commutator.addr_tab.ram[2] !== 2'd1 ||
+            a.u_commutator.addr_tab.ram[3] !== 2'd1 ||
+            b.u_commutator.addr_tab.ram[3] !== 2'd2)
+            $fatal(1, "Route initialization failed");
+
         // Outer commutator: KEY[1] IDLE->TXRX_MODE, KEY[0] -> LISTEN.
-        /*press_a(1);
+        press_a(1);
         press_b(1);
         press_a(0);
         press_b(0);
@@ -196,11 +216,11 @@ module tb_two_tops;
         if (transit_count != 1)
             $fatal(1, "TRANSIT duplication: count=%0d", transit_count);
         $display("ALL TWO-TOP TESTS PASSED");
-        $finish;*/
+        $finish;
     end
 
     initial begin
-        #10000;
+        #200000;
         $fatal(1, "GLOBAL TIMEOUT");
     end
 endmodule
